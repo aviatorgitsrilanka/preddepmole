@@ -1,0 +1,457 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>برنامج التوقعات – ابدا الربح</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .console-box {
+      font-family: monospace;
+      background-color: #1a1a1a;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 0 20px #00ff88;
+      color: #00ff88;
+      height: 250px;
+      overflow-y: auto;
+      direction: ltr;
+      text-align: left;
+    }
+    .loading-screen {
+      font-family: monospace;
+      background: #000;
+      color: #00ff88;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      flex-direction: column;
+      z-index: 50;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+    .hidden-screen { display: none; }
+
+    /* Timer circle */
+    .timer-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .timer-label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+    #countdown {
+      font-size: 1rem;
+      font-family: monospace;
+      font-weight: bold;
+      fill: #ffffff;
+    }
+    #timerCircle {
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    /* Online counter */
+    #online-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1f2937;
+      border: 1px solid #22c55e;
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 0.9rem;
+      color: #22c55e;
+      margin-bottom: 16px;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+
+    /* Live feed */
+    #live-feed {
+      max-width: 480px;
+      margin: 0 auto 24px auto;
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 12px;
+      overflow: hidden;
+      max-height: 130px;
+      overflow-y: hidden;
+    }
+    .feed-item {
+      padding: 8px 14px;
+      font-size: 0.82rem;
+      color: #d1fae5;
+      border-bottom: 1px solid #1f2937;
+      animation: slideIn 0.4s ease;
+      text-align: right;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Analyzing animation */
+    #analyzingBox {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #374151;
+      border-top: 4px solid #22c55e;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .analyzing-text {
+      color: #22c55e;
+      font-family: monospace;
+      font-size: 0.9rem;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 640px) {
+      h2 { font-size: 1.6rem !important; line-height: 1.3 !important; }
+      h1 { font-size: 1rem !important; }
+      #timer-bar { font-size: 0.8rem !important; padding: 8px !important; }
+      #countdown { font-size: 1rem !important; }
+      #online-counter { font-size: 0.75rem !important; }
+      .feed-item { font-size: 0.75rem !important; }
+      #live-feed { max-height: 110px !important; }
+      section { padding-left: 1rem !important; padding-right: 1rem !important; }
+      nav { font-size: 0.75rem !important; }
+      input { width: 90% !important; font-size: 0.9rem !important; }
+      button { font-size: 0.9rem !important; padding: 10px 20px !important; }
+      .grid { grid-template-columns: 1fr !important; }
+      h3 { font-size: 1.2rem !important; }
+      h4 { font-size: 1rem !important; }
+      p { font-size: 0.85rem !important; }
+      .console-box { font-size: 0.75rem !important; height: 150px !important; }
+      #live-feed { max-width: 100% !important; }
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+  <div id="loading" class="loading-screen">
+    <p>كنحضرو ليك كل حاجة... استنى شوية 🇲🇷</p>
+  </div>
+
+  <div id="mainContent" class="hidden-screen">
+
+
+
+    <header class="w-full bg-gray-800 p-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold text-green-400">برنامج التوقعات 1xBet 🇲🇷</h1>
+      <nav class="space-x-4 space-x-reverse">
+        <a href="#how" class="hover:text-green-400">كيفاش كيخدم</a>
+        <a href="#games" class="hover:text-green-400">الألعاب</a>
+        <a href="#start" class="hover:text-green-400">ابدا</a>
+      </nav>
+    </header>
+
+    <section class="flex flex-col items-center justify-center px-4 pt-8 pb-8 text-center">
+
+      <!-- Circle Timer -->
+      <div class="timer-wrap">
+        <svg width="90" height="90" viewBox="0 0 90 90">
+          <circle cx="45" cy="45" r="38" fill="none" stroke="#374151" stroke-width="6"/>
+          <circle id="timerCircle" cx="45" cy="45" r="38" fill="none" stroke="#22c55e" stroke-width="6"
+            stroke-dasharray="238.76" stroke-dashoffset="0"
+            stroke-linecap="round" transform="rotate(-90 45 45)"/>
+          <text id="countdown" x="45" y="50" text-anchor="middle" font-size="16" font-family="monospace" font-weight="bold" fill="white">03:00</text>
+        </svg>
+        <span class="timer-label">⏳ الوصول المجاني</span>
+      </div>
+
+      <h2 class="text-3xl md:text-5xl font-bold mb-6">
+        ربح فلوس حقيقية مع برنامج التوقعات
+      </h2>
+
+      <!-- Online counter -->
+      <div id="online-counter">
+        <span class="pulse-dot"></span>
+        <span>متصلين دابا: <strong id="online-count">47</strong> واحد</span>
+      </div>
+
+      <div class="mb-4 text-lg font-semibold text-yellow-300">
+        👋 <span class="text-green-400">سيدي</span>: برنامج توقعات رسمي، رزق حلال وبركة من ربي
+      </div>
+      <p class="max-w-xl mb-2 text-gray-300">خويا، ناس كثار معانا كيربحو كل يوم. نتا الجاي؟</p>
+      <p class="mb-4 text-gray-400 text-sm">👇</p>
+      <p class="mb-6 text-green-400 font-semibold text-sm" dir="ltr">🎮 Aviator &nbsp;|&nbsp; 💣 Mines &nbsp;|&nbsp; 🥅 Penalty &nbsp;|&nbsp; 🍎 Apple of Fortune</p>
+
+      <!-- Live activity feed -->
+      <div id="live-feed">
+        <div class="feed-item">🇲🇷 واحد 1623847419 ربح للتو 1,850 MRU ✅</div>
+        <div class="feed-item">🇲🇷 واحد 1628473422 دخل من دقيقتين</div>
+        <div class="feed-item">🇲🇷 واحد 1625934871 ربح للتو 2,400 MRU ✅</div>
+      </div>
+
+            <input id="userId" type="text" placeholder="دخل ID ديالك في 1xBet" class="bg-gray-700 text-white p-3 rounded-md mb-4 text-center w-full max-w-sm">
+      <button id="connectButton" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-xl text-lg transition mb-8">ربط الحساب</button>
+
+      <div id="connectionSuccess" class="hidden text-green-400 font-bold mt-6 mb-4">
+        <p>معرف الحساب: <span id="accountIdDisplay"></span> تربط بنجاح!</p>
+        <p>الحالة: نشط | البرنامج جاهز</p>
+        <button id="getSignalButton" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl text-lg transition mt-4">جيب الإشارة</button>
+      </div>
+
+      <!-- Analyzing animation -->
+      <div id="analyzingBox">
+        <div class="spinner"></div>
+        <div class="analyzing-text">كنحلل البيانات...</div>
+      </div>
+
+      <div id="depositErrorBox" class="hidden bg-red-600 p-6 rounded-xl max-w-md mx-auto mt-6">
+        <h2 class="text-xl font-bold mb-2">⚠️ ما لقيناش أي إيداع</h2>
+        <p class="mb-4">خويا، رصيدك فارغ. شحن <strong>100 MRU أو أكثر</strong> باش تفتح الوصول للإشارات وتبدا تربح.</p>
+        <p class="mb-4 font-bold">إلا كان رصيدك أقل من 100 MRU، البرنامج ما يقدرش يضيف حسابك.</p>
+        <a href="https://reffpa.com/L?tag=d_5435289m_62287c_&site=5435289&ad=62287&r=registration" target="_blank" class="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg transition">
+          شحن دابا في 1xBet
+        </a>
+        <div class="mt-6 bg-red-800 text-white p-4 rounded-lg font-bold text-center">
+          <div class="mb-1 text-lg">الكود ديالك: <span class="bg-black p-1 rounded text-green-400">EXPO777</span></div>
+          <div>خاصك تسجل حساب جديد بالكود <span class="underline text-yellow-300">EXPO777</span></div>
+        </div>
+      </div>
+
+      <div id="oldAccountErrorBox" class="hidden bg-red-600 p-6 rounded-xl max-w-md mx-auto mt-6">
+        <h2 class="text-xl font-bold mb-2">⚠️ خطأ! حساب قديم</h2>
+        <p class="mb-4">حسابك قديم بزاف والبرنامج ما يخدمش معاه. باش تقدر تاخد الإشارات، <strong>خاصك تسجل حساب جديد من الصفر</strong>.</p>
+        <a href="https://reffpa.com/L?tag=d_5435289m_62287c_&site=5435289&ad=62287&r=registration" target="_blank" class="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg transition">
+          سجل حساب جديد دابا
+        </a>
+        <div class="mt-6 bg-red-800 text-white p-4 rounded-lg font-bold text-center">
+          <div class="mb-1 text-lg">الكود ديالك: <span class="bg-black p-1 rounded text-green-400">EXPO777</span></div>
+          <div>سجل حسابك الجديد بالكود <span class="underline text-yellow-300">EXPO777</span> باش يتقبل!</div>
+        </div>
+      </div>
+
+      <img id="errorImage" src="instruction.png" alt="Instruction" class="hidden max-w-md mx-auto mt-4 rounded-xl shadow-lg w-full">
+    </section>
+
+    <!-- Screenshot Slider -->
+    <section class="bg-gray-900 py-8 px-6 text-center">
+      <div class="w-full max-w-sm mx-auto">
+        <p class="text-yellow-300 font-semibold mb-3 text-sm">📸 ناس بدأوا اليوم معانا</p>
+        <div class="relative rounded-xl border border-gray-700 overflow-hidden bg-gray-900" style="height:280px;">
+          <img id="sliderImg" src="s1.jpg" alt="screenshot" style="width:100%;height:100%;object-fit:contain;transition:opacity 0.5s;">
+          <div id="sliderDots" class="absolute bottom-2 left-0 right-0 flex justify-center gap-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-gray-800 py-12 px-6 text-center">
+      <h3 class="text-2xl font-bold text-green-400 mb-6">الفايزين اليوم (MRU)</h3>
+      <div class="grid md:grid-cols-2 gap-4 text-left max-w-4xl mx-auto text-sm text-green-300" dir="ltr">
+        <p>🇲🇷 👤 User: 1628473422 – 2,328 MRU</p>
+        <p>🇲🇷 👤 User: 1623847419 – 1,900 MRU</p>
+        <p>🇲🇷 👤 User: 1629234865 – 3,120 MRU</p>
+        <p>🇲🇷 👤 User: 1627339184 – 1,500 MRU</p>
+        <p>🇲🇷 👤 User: 1622900147 – 2,850 MRU</p>
+        <p>🇲🇷 👤 User: 1623721056 – 4,440 MRU</p>
+        <p>🇲🇷 👤 User: 1621937793 – 1,705 MRU</p>
+        <p>🇲🇷 👤 User: 1624921832 – 2,330 MRU</p>
+        <p>🇲🇷 👤 User: 1623238701 – 3,000 MRU</p>
+        <p>🇲🇷 👤 User: 1627749358 – 1,210 MRU</p>
+      </div>
+    </section>
+
+    <section id="games" class="bg-gray-800 py-12 px-6 text-center">
+      <h3 class="text-2xl font-bold text-green-400 mb-6">الألعاب المتاحة</h3>
+      <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+          <h4 class="text-xl font-bold mb-2">🎮 Aviator</h4>
+          <p class="text-gray-300">توقع وقت السحب قبل ما تطير الطيارة. البرنامج كيكتشف الأنماط في الوقت الحقيقي.</p>
+        </div>
+        <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+          <h4 class="text-xl font-bold mb-2">💣 Mines</h4>
+          <p class="text-gray-300">تجنب القنابل وخد أرباحك. البرنامج كيلقى المسارات الأأمن باش تربح أكثر.</p>
+        </div>
+        <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+          <h4 class="text-xl font-bold mb-2">🥅 Penalty</h4>
+          <p class="text-gray-300">عرف فين تسدد. هزم الحارس بتوقعات مبنية على البيانات.</p>
+        </div>
+        <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+          <h4 class="text-xl font-bold mb-2">🍎 Apple of Fortune</h4>
+          <p class="text-gray-300">خويا، البرنامج كيحدد ليك الخيار الصح قبل ما تختار. ربح مضمون مع كل جولة.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="bg-gray-900 py-12 px-6 text-center">
+      <h3 class="text-2xl font-bold text-green-400 mb-6">كيفاش كيخدم</h3>
+      <div class="max-w-3xl mx-auto space-y-4 text-gray-300">
+        <p>📡 البرنامج كيحلل بيانات اللعبة مباشرة وتاريخياً 24/7.</p>
+        <p>💡 كيحدد الأنماط اللي كتخلي الربح مستمر.</p>
+        <p>📲 كتوصلك إشارات موثوقة في الوقت الحقيقي على جهازك.</p>
+      </div>
+    </section>
+
+    <section class="bg-black py-12 px-6 text-center">
+      <h3 class="text-xl font-bold text-green-400 mb-4">[ سجل النظام – مراقبة مباشرة ]</h3>
+      <div class="console-box max-w-3xl mx-auto" id="console">
+        <p>[INFO] Prediction service active ✅</p>
+      </div>
+    </section>
+
+    <footer class="text-center text-gray-500 text-sm py-6">
+      © 2025 برنامج التوقعات. مش تابع لـ 1xBet. استخدمه بمسؤولية.
+    </footer>
+  </div>
+
+  <script>
+    // Loading screen
+    setTimeout(() => {
+      document.getElementById("loading").classList.add("hidden-screen");
+      document.getElementById("mainContent").classList.remove("hidden-screen");
+    }, 3000);
+
+    // ── TIMER CIRCLE ──
+    const totalSeconds = 3 * 60;
+    let timerSeconds = totalSeconds;
+    const countdownEl = document.getElementById("countdown");
+    const timerCircle = document.getElementById("timerCircle");
+    const circumference = 238.76;
+    const timerInterval = setInterval(() => {
+      if (timerSeconds <= 0) { clearInterval(timerInterval); countdownEl.textContent = "00:00"; timerCircle.style.stroke = "#dc2626"; return; }
+      timerSeconds--;
+      const m = String(Math.floor(timerSeconds / 60)).padStart(2, "0");
+      const s = String(timerSeconds % 60).padStart(2, "0");
+      countdownEl.textContent = m + ":" + s;
+      const offset = circumference * (1 - timerSeconds / totalSeconds);
+      timerCircle.style.strokeDashoffset = offset;
+    }, 1000);
+
+    // ── ONLINE COUNTER ──
+    let onlineCount = 41 + Math.floor(Math.random() * 20);
+    document.getElementById("online-count").textContent = onlineCount;
+    setInterval(() => {
+      const delta = Math.random() > 0.5 ? 1 : -1;
+      onlineCount = Math.max(30, Math.min(80, onlineCount + delta));
+      document.getElementById("online-count").textContent = onlineCount;
+    }, 4000);
+
+    // ── LIVE FEED ──
+    const feedMessages = [
+      "🇲🇷 واحد 1623847419 ربح للتو 1,200 MRU ✅",
+      "🇲🇷 واحد 1628473422 دخل من دقيقة",
+      "🇲🇷 واحد 1624512873 ربح للتو 2,100 MRU ✅",
+      "🇲🇷 واحد 1621938475 دخل للتو",
+      "🇲🇷 واحد 1625934871 ربح للتو 1,750 MRU ✅",
+      "🇲🇷 واحد 1627349201 ربح للتو 3,000 MRU ✅",
+      "🇲🇷 واحد 1622817364 دخل من 3 دقايق",
+      "🇲🇷 واحد 1629043715 ربح للتو 900 MRU ✅",
+    ];
+    let feedIndex = 3;
+    const feedEl = document.getElementById("live-feed");
+    setInterval(() => {
+      const item = document.createElement("div");
+      item.className = "feed-item";
+      item.textContent = feedMessages[feedIndex % feedMessages.length];
+      feedIndex++;
+      feedEl.insertBefore(item, feedEl.firstChild);
+      if (feedEl.children.length > 4) feedEl.removeChild(feedEl.lastChild);
+    }, 5000);
+
+    // ── CONNECT BUTTON ──
+    document.getElementById("connectButton").addEventListener("click", () => {
+      const userId = document.getElementById("userId").value.trim();
+      if (!userId) return;
+
+      const prefixStr = userId.substring(0, 3);
+      const prefixNum = parseInt(prefixStr, 10);
+
+      document.getElementById("connectionSuccess").classList.add("hidden");
+      document.getElementById("depositErrorBox").classList.add("hidden");
+      document.getElementById("oldAccountErrorBox").classList.add("hidden");
+      document.getElementById("errorImage").classList.add("hidden");
+
+      if (userId.length < 3 || isNaN(prefixNum) || prefixNum < 160) {
+        document.getElementById("oldAccountErrorBox").classList.remove("hidden");
+        document.getElementById("errorImage").classList.remove("hidden");
+      } else {
+        document.getElementById("accountIdDisplay").innerText = userId;
+        document.getElementById("connectionSuccess").classList.remove("hidden");
+      }
+    });
+
+    // ── GET SIGNAL BUTTON with analyzing animation ──
+    document.getElementById("getSignalButton").addEventListener("click", () => {
+      document.getElementById("getSignalButton").disabled = true;
+      document.getElementById("getSignalButton").textContent = "كنحلل...";
+      const box = document.getElementById("analyzingBox");
+      box.style.display = "flex";
+
+      const steps = ["كنحلل البيانات...", "كنفحص البرنامج...", "كنقلب على إشارة...", "كنتحقق من الرصيد..."];
+      let i = 0;
+      const textEl = box.querySelector(".analyzing-text");
+      const stepInterval = setInterval(() => {
+        textEl.textContent = steps[i % steps.length];
+        i++;
+      }, 700);
+
+      setTimeout(() => {
+        clearInterval(stepInterval);
+        box.style.display = "none";
+        document.getElementById("depositErrorBox").classList.remove("hidden");
+        document.getElementById("errorImage").classList.remove("hidden");
+        document.getElementById("getSignalButton").disabled = false;
+        document.getElementById("getSignalButton").textContent = "جيب الإشارة";
+      }, 3000);
+    });
+
+    // ── SCREENSHOT SLIDER ──
+    const screenshots = ['s1.jpg','s2.jpg','s3.jpg','s4.jpg','s5.jpg','s6.jpg'];
+    let slideIndex = 0;
+    const sliderImg = document.getElementById('sliderImg');
+    const dotsEl = document.getElementById('sliderDots');
+
+    screenshots.forEach((_, i) => {
+      const dot = document.createElement('span');
+      dot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:' + (i===0?'#22c55e':'#4b5563') + ';display:inline-block;cursor:pointer;margin:0 3px;';
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsEl.appendChild(dot);
+    });
+
+    function goToSlide(i) {
+      slideIndex = i;
+      sliderImg.style.opacity = '0';
+      setTimeout(() => {
+        sliderImg.src = screenshots[slideIndex];
+        sliderImg.style.opacity = '1';
+        Array.from(dotsEl.children).forEach((d, idx) => {
+          d.style.background = idx === slideIndex ? '#22c55e' : '#4b5563';
+        });
+      }, 300);
+    }
+
+    setInterval(() => {
+      goToSlide((slideIndex + 1) % screenshots.length);
+    }, 2500);
+  </script>
+</body></html>
